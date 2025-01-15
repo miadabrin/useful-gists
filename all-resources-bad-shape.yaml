@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-snake-game
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: example-snake-game
+  template:
+    metadata:
+      labels:
+        app: example-snake-game
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: example-snake-game
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: game-container
+          image: thoschu/de.schulte360.web.snake
+          ports:
+            - name: http
+              containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-game-service
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8090
+  selector:
+    app: example-snake-game
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-game-ingress
+spec:
+  ingressClassName: ngrok
+  rules:
+    - host: fellow-sre-interview.ngrok.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: example-game-service
+                port:
+                  number: 8080
