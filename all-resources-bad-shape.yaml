@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: example-snake-game
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: example-snake-game
